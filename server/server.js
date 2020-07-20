@@ -1,6 +1,8 @@
 require("./config/config");
 
 const express = require("express");
+const mongoose = require("mongoose");
+
 const app = express();
 
 const bodyParser = require("body-parser");
@@ -11,36 +13,24 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
-app.get("/user", function (req, res) {
-  res.json("get user LOCAL!!!");
-});
+// Import and use user routes
+app.use(require("./routes/user"));
 
-app.post("/user", function (req, res) {
-  let body = req.body;
-
-  if (body.name === undefined) {
-    res.status(400).json({
-      ok: false,
-      mensaje: `The name is necessary ${body.name} `,
-    });
-  } else {
-    res.json({
-      user: body,
-    });
+mongoose.connect(
+  "mongodb://localhost:27017/cafe",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+  },
+  (err, res) => {
+    if (err) {
+      throw err;
+    }
+    console.log("Online database");
   }
-});
-
-app.put("/user/:id", function (req, res) {
-  let id = req.params.id;
-
-  res.json({
-    id,
-  });
-});
-
-app.delete("/user", function (req, res) {
-  res.json("delete user");
-});
+);
 
 app.listen(process.env.PORT, () => {
   console.log("Listening port: ", process.env.PORT);
