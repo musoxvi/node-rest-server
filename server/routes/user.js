@@ -61,6 +61,7 @@ app.post("/user", function (req, res) {
 
 app.put("/user/:id", function (req, res) {
   let id = req.params.id;
+  //filter the body by the elements we want to add
   let body = _.pick(req.body, ["name", "email", "img", "role", "state"]);
 
   User.findByIdAndUpdate(
@@ -83,8 +84,31 @@ app.put("/user/:id", function (req, res) {
   );
 });
 
-app.delete("/user", function (req, res) {
-  res.json("delete user");
+app.delete("/user/:id", function (req, res) {
+  let id = req.params.id;
+
+  User.findByIdAndRemove(id, (err, userDeleted) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        err,
+      });
+    }
+
+    if (!userDeleted) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "User not found",
+        },
+      });
+    }
+
+    res.json({
+      ok: true,
+      user: userDeleted,
+    });
+  });
 });
 
 module.exports = app;
